@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+if git diff --cached --name-only | grep -qxF '.env'; then
+    echo "pre-commit: refusing to commit .env" >&2
+    exit 1
+fi
+
+if git diff --cached -U0 | grep -qE '^\+.*(sk-or-v1-[A-Za-z0-9]{32,}|sk-[A-Za-z0-9]{40,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16})'; then
+    echo "pre-commit: staged changes look like they contain an API key" >&2
+    exit 1
+fi

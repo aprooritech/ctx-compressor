@@ -1,0 +1,36 @@
+# Deterministic project name (the directory name may contain spaces).
+name: context-compressor-proxy
+
+services:
+  proxy:
+    build: .
+    image: context-compressor-proxy:latest
+    ports:
+      - "8000:8000"
+    # Create it first:  cp .env.example .env
+    env_file:
+      - .env
+    environment:
+      # Inside the compose network Ollama is reachable by service name.
+      OLLAMA_HOST: http://ollama:11434
+      DB_PATH: /app/data/proxy.db
+    volumes:
+      # Named volume, so the container user (uid 10001) owns it. A bind mount
+      # such as ./data:/app/data would be owned by the host user and the
+      # container could not write to it without matching `user:` ids.
+      - proxy-data:/app/data
+    restart: unless-stopped
+
+  # Uncomment to run a local model next to the proxy, then:
+  #   docker compose exec ollama ollama pull llama3.1
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-models:/root/.ollama
+  #   restart: unless-stopped
+
+volumes:
+  proxy-data:
+  # ollama-models:
